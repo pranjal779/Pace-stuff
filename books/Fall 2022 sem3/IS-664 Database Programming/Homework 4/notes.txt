@@ -1,0 +1,15 @@
+UnitID
+UnitLocation <- AF_Location
+Fire_location from activefires
+DroneRange
+DroneSpeed
+DistanceToFire
+FlightTimeToFire
+DroneOperational
+DronesReady
+TotalCapacity
+RequiredCapacity
+TotalMissionCost
+
+
+drone range > activefires

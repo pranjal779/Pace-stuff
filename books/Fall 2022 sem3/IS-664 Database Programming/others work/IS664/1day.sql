@@ -1,0 +1,1 @@
+select 'Lee' as Name;

@@ -1,0 +1,178 @@
+/*
+Script For Stored Function Development  
+ - By Leena Bhirud
+9 October 2021
+*/
+
+
+-- Create Namespace 
+DROP DATABASE IF EXISTS BHIRUDHW2;
+CREATE DATABASE BHIRUDHW2;
+USE BHIRUDHW2;
+
+-- Create Table To Calculate Variance And Standard Deviation
+CREATE TABLE IF NOT EXISTS calc_Variance
+(
+	ID INT NOT NULL KEY AUTO_INCREMENT,
+	SingleDigit INT NOT NULL
+);
+
+-- To Truncate The Existing Contents From The Table 	
+DELETE FROM calc_Variance;
+
+
+-- FUNCTION TO CALCUALTE HOURS BETWEEN 2 DATES 
+
+DELIMITER //
+CREATE FUNCTION CalculateHours( Date1 DATE , Date2 DATE )	
+RETURNS INT
+DETERMINISTIC
+
+BEGIN
+ 	DECLARE Days INT ;
+ 	DECLARE Hrs INT ; 
+ 	DECLARE DifferenceHrs INT;
+
+ -- DATE DIFFERENCE
+ 	SET Days = ABS(DATEDIFF(Date1, Date2)) ;
+ -- HOURS CALCULATION 
+ 	SET Hrs  = HOUR('24:00:00');
+ --  HOURS DIFFERENCE
+ 	SET DifferenceHrs = Days * Hrs ;  
+ 	RETURN DifferenceHrs ;
+
+END //
+DELIMITER ;
+
+
+-- FUNCTION TO DETERMINE THE LARGEST DATE RANGE 
+
+DELIMITER //
+CREATE FUNCTION determineLargestTimeGap( Date1 DATE , Date2 DATE , Date3 DATE , Date4 DATE )	
+RETURNS VARCHAR(60)
+DETERMINISTIC
+
+BEGIN
+ 	DECLARE Days1 INT ;
+ 	DECLARE Days2 INT ; 
+ 	DECLARE largest_range VARCHAR(60);
+
+ -- GET HOURS BETWEEN 2 DATE RANGE
+ 	SET Days1 = CalculateHours(Date1 , Date2) ;
+ 	SET Days2 = CalculateHours(Date3 , Date4) ; 
+
+-- TO FIND LARGEST RANGE BETWEEN TWO DATES
+	IF Days1 > Days2 THEN 
+ 		 SET largest_range = CONCAT_WS('-' ,'GAP', Date1,'TO', Date2);
+	ELSE
+  	     SET largest_range = CONCAT_WS('-','GAP', Date3,'TO',Date4);
+    END IF;
+
+    RETURN largest_range ;
+
+END //
+DELIMITER ;
+
+
+
+-- FUNCTION TO READ THE DIGITS FROM A NUMERIC STRING
+DELIMITER //
+CREATE FUNCTION readDigits(A VARCHAR(10))	
+RETURNS BOOLEAN
+DETERMINISTIC
+
+BEGIN 
+    DECLARE singlechar VARCHAR(1);
+    DECLARE TempDigit BOOLEAN;
+    DECLARE I INT;
+    DECLARE SDigit INT;
+    DECLARE Len INT;
+     
+     
+-- SET COUNTER TO 1 		
+    SET I = 1;
+    SET Len = LENGTH(A);
+
+
+  WHILE I <= Len DO
+-- TO GET SIGLE DIGIT FROM NUMBER STRING 
+    SET singlechar = SUBSTRING(A, I, 1);
+
+-- TO CONVERT VARCHAR TO INTEGER 
+    SET SDigit = CAST(singlechar AS SIGNED INT);
+
+-- INSERT VALUES TO THE TABLE     
+     INSERT INTO calc_Variance(SingleDigit) VALUES (SDigit); 	  
+     SET I = I +1 ; 
+   END WHILE;
+ 	 
+    SET TempDigit = TRUE;
+    RETURN TempDigit;
+
+END //
+DELIMITER ;
+
+
+-- FUNCTION TO CALCULATE THE VARIANCE OF A NUMERIC STRING
+
+DELIMITER //
+CREATE FUNCTION calcVariance( A VARCHAR(10) )	
+RETURNS  DECIMAL(4,2)
+DETERMINISTIC
+
+BEGIN
+     DECLARE Variance_no  DECIMAL(4,2) ;
+     DECLARE Flag  BOOLEAN ; 
+     
+     SET Flag = readDigits(A) ;
+
+-- TO CALCULATE THE VARIANCE FROM A TABLE calc_Variance 
+     IF Flag = TRUE THEN 
+	   SELECT VARIANCE(SingleDigit) FROM calc_Variance INTO Variance_no   ;
+ 	 END IF;
+
+     RETURN Variance_no  ;
+
+END //
+DELIMITER ;
+
+
+
+-- FUNCTION TO CALCULATE THE STANDARD DEVIATION OF A NUMERIC STRING
+
+DELIMITER //
+CREATE FUNCTION calcStandardDeviation ( A VARCHAR(10) )	
+RETURNS  DECIMAL(4,2)
+DETERMINISTIC
+
+BEGIN
+     DECLARE StdDev DECIMAL(4,2) ;
+     DECLARE Flag BOOLEAN ; 
+     
+     SET Flag =readDigits(A) ;
+
+-- TO CALCULATE THE STANDARD DEVIATION FROM A TABLE calc_Variance 
+     IF Flag = TRUE THEN 
+	  SELECT  StdDev(SingleDigit) FROM calc_Variance INTO StdDev ;
+ 	 END IF;
+
+     RETURN StdDev ;
+
+END //
+DELIMITER ;
+
+
+-- FUNCTION CALLS
+-- FUNCTION CALL TO CALCUALTE HOURS BETWEEN 2 DATES
+SELECT CalculateHours('2021-10-8' , '2021-10-10') AS T1; 
+
+-- FUNCTION CALL TO DETERMINE THE LARGEST DATE RANGE 
+SELECT determineLargestTimeGap('2020-01-01','2020-03-01','2020-04-01','2020-11-01') AS T2;
+
+-- FUNCTION CALL TO CALCULATE THE VARIANCE OF A NUMERIC STRING
+ SELECT  calcVariance('12345') AS T3 ;
+
+-- FUNCTION CALL TO CALCULATE THE STANDARD DEVIATION OF A NUMERIC STRING
+SELECT calcStandardDeviation ('12345') AS T4;	
+
+

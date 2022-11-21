@@ -1,0 +1,221 @@
+/*
+Final Practice Exam
+IS 664 Database Programming
+Leena Bhirud - Fall 2021
+*/
+
+USE imperial_defense;
+
+-- To display if widget is secure or open 
+DROP FUNCTION IF EXISTS widgetSecure;
+DELIMITER //
+CREATE FUNCTION widgetSecure(N_SECURE INT)
+RETURNS VARCHAR(10)
+DETERMINISTIC
+
+BEGIN
+	DECLARE CTEXT VARCHAR(10);
+	IF N_SECURE = 1 THEN
+		SET CTEXT = 'Secure';
+    ELSE
+        SET CTEXT = 'Open';	
+	END IF;
+	RETURN CTEXT;
+
+END //
+DELIMITER ;
+
+DROP FUNCTION IF EXISTS netSwitched;
+DELIMITER //
+CREATE FUNCTION netSwitched(N_CSwitched INT)
+RETURNS VARCHAR(20)
+DETERMINISTIC
+
+BEGIN
+	DECLARE CTEXT VARCHAR(20);
+	IF N_CSwitched = 1 THEN
+		SET CTEXT = 'Switched';
+    ELSE
+        SET CTEXT = 'Not Switched';	
+	END IF;
+	RETURN CTEXT;
+END //
+DELIMITER ;
+
+
+-- To display net status 
+DROP FUNCTION IF EXISTS netStatus;
+DELIMITER //
+CREATE FUNCTION netStatus(N_NETNAME VARCHAR(25), N_NETTYPE VARCHAR(6), N_NETSTATUS VARCHAR(10))
+RETURNS VARCHAR(100)
+DETERMINISTIC
+
+BEGIN
+	DECLARE CTEXT VARCHAR(100);
+	
+	     IF N_NETNAME  LIKE '%_SAT%' THEN 
+           SET CTEXT = 'SAT';
+         END IF;
+         IF N_NETNAME  LIKE '%_TRACK%' THEN 
+           SET CTEXT = 'TRACK';
+         END IF;
+         IF N_NETNAME  LIKE '%_SURV%' THEN 
+           SET CTEXT = 'SURV';
+         END IF;
+         IF N_NETNAME  LIKE '%_CIV%' THEN 
+           SET CTEXT = 'CIV';
+         END IF;
+         IF N_NETNAME  LIKE '%_DEF%' THEN 
+           SET CTEXT = 'DEF';
+         END IF; 
+
+     SET CTEXT = CONCAT_WS(' ',CTEXT,N_NETTYPE,'Network', N_NETNAME,'is currently',N_NETSTATUS); 
+	RETURN CTEXT;
+
+END //
+DELIMITER ;
+
+-- To display json for net bandwidth 
+DROP FUNCTION IF EXISTS netBandwidth;
+DELIMITER //
+CREATE FUNCTION netBandwidth(N_BANDWIDTH DECIMAL(10,2),N_OPTIMUMBW DECIMAL(10,2),N_MAXbw DECIMAL(10,2),N_MINBW DECIMAL(10,2))
+RETURNS JSON
+DETERMINISTIC
+
+BEGIN
+	DECLARE CTEXT JSON;
+	SET CTEXT = JSON_ARRAY(N_BANDWIDTH,N_OPTIMUMBW,N_MAXbw,N_MINBW);
+	RETURN CTEXT;
+
+END //
+DELIMITER ;
+
+-- to calculate mean, Variance, SD
+DROP FUNCTION IF EXISTS netBandwidthStat;
+DELIMITER //
+CREATE FUNCTION netBandwidthstat(N_BANDWIDTH DECIMAL(10,2),N_OPTIMUMBW DECIMAL(10,2),N_MAXbw DECIMAL(10,2),N_MINBW DECIMAL(10,2))
+RETURNS JSON
+DETERMINISTIC
+
+BEGIN
+	DECLARE CTEXT json; DECLARE I INT; DECLARE ALLNUM int ;  DECLARE allvalue json ; declare addval DECIMAL(10,3) ; Declare len int ;
+	DECLARE MUVAL DECIMAL(10,3); DECLARE NUMVAL DECIMAL(10,3); DECLARE SIGMA2 DECIMAL(10,3); DECLARE SIGMA DECIMAL(10,3);
+    
+    set allvalue = JSON_ARRAY(N_BANDWIDTH,N_OPTIMUMBW,N_MAXbw,N_MINBW); 
+	SET allNum = JSON_LENGTH(allvalue);
+    set addval = N_BANDWIDTH+N_OPTIMUMBW+N_MAXbw+N_MINBW ;
+	SET MUVAL = addval/ allNum; 
+    SET I = 0 ;		
+    SET SIGMA2 = 0;
+
+    WHILE I < allnum DO 
+    	SET NUMVAL = JSON_EXTRACT(allvalue, CONCAT('$[',I,']')); 
+    	SET SIGMA2 = SIGMA2 + POW((NUMVAL-MUVAL),2) ;
+    	SET I = I+1;
+    END WHILE;
+     set len = allnum -1 ;
+     SET SIGMA2 = SIGMA2 / len ;
+     SET SIGMA = SQRT(SIGMA2);
+	SET CTEXT = JSON_ARRAY(MUVAL,SIGMA2,sigma);	
+	RETURN CTEXT;
+
+END //
+DELIMITER ;
+
+
+
+
+-- To get location data
+DROP FUNCTION IF EXISTS getLoc;
+DELIMITER //
+CREATE FUNCTION getLoc(N_LOCATION VARCHAR(25))
+RETURNS VARCHAR(50)
+DETERMINISTIC
+
+BEGIN
+   DECLARE CTEXT VARCHAR(50);
+   DECLARE X INT; DECLARE Y INT;
+
+   SELECT XCOORD FROM SITE WHERE SITENAME = N_LOCATION  INTO X ;   
+   SELECT YCOORD FROM SITE  WHERE SITENAME = N_LOCATION  INTO Y;
+   SET CTEXT = CONCAT( N_LOCATION,' at Coordinates:(',X,',',Y,')');
+
+   RETURN CTEXT;
+END //
+DELIMITER ;
+
+
+
+
+DROP PROCEDURE IF EXISTS  widgetNetworkAnalysis;
+DELIMITER //
+CREATE PROCEDURE widgetNetworkAnalysis(A INT , B INT)
+
+BEGIN
+		-- UTILITY VARIABLES
+		DECLARE I INT; DECLARE COUNT INT; DECLARE COUNTER INT;
+		DECLARE WIDSECURE VARCHAR(20); DECLARE WIDTYPE VARCHAR(40); DECLARE NetStat VARCHAR(100);
+		DECLARE netSwitch VARCHAR(20); DECLARE NETBW_JSON JSON; DECLARE NETBWSTAT_JSON JSON; DECLARE netLoc VARCHAR(100);
+		
+		-- CURSOR VARIABLES
+		DECLARE N_NETNAME VARCHAR(25); DECLARE N_NETTYPE VARCHAR(6); DECLARE N_BANDWIDTH DECIMAL(10,2);
+		DECLARE N_OPTIMUMBW DECIMAL(10,2); DECLARE N_MAXbw DECIMAL(10,2); DECLARE N_MINBW DECIMAL(10,2);
+		DECLARE N_CSwitched TINYINT(1); DECLARE N_NETSTATUS VARCHAR(10); DECLARE N_WID VARCHAR(25); DECLARE N_WTYPE VARCHAR(8);
+		DECLARE N_LOCATION VARCHAR(25); DECLARE N_SECURE TINYINT(1) ;
+
+		-- DECLARE CURSOR
+		DECLARE FW_CURSOR CURSOR FOR SELECT	N.NetName, N.NetType, N.Bandwidth, N.OptimumBW, N.MaxBW, N.MinBW, N.CSwitched, N.NetStatus,
+		                                    W.WID,W.WTYPE,W.LOCATION, W.SECURE
+                                            FROM NETWORK N INNER JOIN  WIDGET W
+                                            ON N.NETNAME = W.AssignedTo
+                                            WHERE W.WID like CONCAT('%', A , '_', B,'%');
+
+        -- Table creation 
+		DROP TABLE IF EXISTS widgetNET;
+		CREATE TABLE widgetNET(
+		WID_ID_type VARCHAR(30),
+		WID_IsSecure VARCHAR(50),
+		NET_Status VARCHAR(100),
+		NET_IsSwitched VARCHAR(50),
+		NET_Bandwidths JSON,
+		NET_BandwidthsStats JSON,
+		SITE_Name_Location VARCHAR(50),
+		CONSTRAINT PK_WID PRIMARY KEY(WID_ID_type) );
+
+		-- OPEN CURSOR
+		OPEN FW_CURSOR;
+		SET COUNT = FOUND_ROWS();
+		SET I = 0;
+
+		-- FETCH CURSOR
+		WHILE I < COUNT DO
+			FETCH FW_CURSOR INTO N_NETNAME, N_NETTYPE,N_BANDWIDTH,N_OPTIMUMBW,N_MAXbw,N_MINBW,N_CSwitched,N_NETSTATUS,N_WID,
+			                     N_WTYPE, N_LOCATION, N_SECURE;
+                
+			SET WIDTYPE = CONCAT_ws(' ',N_WID,N_WTYPE);       
+			SET WIDSECURE = widgetSecure(N_SECURE); 
+			SET NetStat = netStatus(N_NETNAME, N_NETTYPE,N_NETSTATUS);
+            SET netSwitch = netSwitched(N_CSwitched);
+            SET NETBW_JSON = netBandwidth(N_BANDWIDTH,N_OPTIMUMBW,N_MAXbw,N_MINBW);
+            SET NETBWSTAT_JSON = netBandwidthstat(N_BANDWIDTH,N_OPTIMUMBW,N_MAXbw,N_MINBW);       	
+            SET netLoc = getLoc(N_LOCATION);
+            INSERT INTO widgetNET(WID_ID_type,WID_IsSecure,NET_Status,NET_IsSwitched,NET_Bandwidths,NET_BandwidthsStats, SITE_Name_Location)
+                           VALUES(WIDTYPE, WIDSECURE,NetStat,netSwitch,NETBW_JSON, NETBWSTAT_JSON, netLoc); 
+                           
+			SET I = I + 1;
+		END WHILE;
+
+			-- CLOSE CURSOR
+			CLOSE FW_CURSOR;
+
+			-- DISPLAY TABLE
+             SELECT * FROM widgetNET;
+END //
+DELIMITER ;
+
+-- Call Procedure
+CALL widgetNetworkAnalysis(1,6);
+CALL widgetNetworkAnalysis(2,5);
+CALL widgetNetworkAnalysis(3,4);
+
+

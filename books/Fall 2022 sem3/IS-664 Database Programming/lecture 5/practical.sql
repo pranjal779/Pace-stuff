@@ -1,0 +1,52 @@
+DROP DATABASE IF EXISTS practicalFunction;
+CREATE DATABASE practicalFunction;
+USE practicalFunction;
+
+SELECT 1 AS ExNumber;
+
+DELIMITER //
+CREATE FUNCTION displayScriptAuthor()
+RETURNS VARCHAR(30)
+DETERMINISTIC
+
+BEGIN
+    DECLARE MyName VARCHAR(30);
+    SET MyName = "Pranjal Shukla";
+    RETURN MyName;
+
+END //
+DELIMITER ;
+
+SELECT displayScriptAuthor() AS AuthorName;
+
+
+-- 2nd try
+SELECT 2 AS ExNumber;
+
+DELIMITER //
+CREATE FUNCTION average5(A INT, B INT, C INT, D INT, E INT)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+
+BEGIN
+    DECLARE V DECIMAL(10,2);
+    SET V = (A + B + C + D + E) / 5;
+    RETURN V;
+
+END //
+DELIMITER ;
+
+SELECT average5(1,2,3,4,5) AS MSG_averageOf5;
+
+-- varianceA
+
+DELIMITER //
+CREATE FUNCTION varianceA(A JSON)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+
+BEGIN
+    DECLARE I INT; DECLARE J DECLARE(10,2); DECLARE H DECIMAL(10,2);
+    DECLARE DIFF INT;
+    
+

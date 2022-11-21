@@ -1,0 +1,17 @@
+/*
+ The programming power of MySQL is limited when compared to other languages.
+ MySQL language constructs are designed specifically to work with MySQL databases rather than as a 
+general-purpose programming language.
+ MySQL provided extensions to SQL known as stored programs. Stored programs can include 
+procedural code that controls the flow of execution of a database operation.
+ There are four types of stored programs:
+ Stored Procedure
+ Can be called from an application that has access to the database.
+ Stored Function
+ Can be called from a SQL statement.
+ Trigger
+ Is executed in response to an INSERT, UPDATE, or DELETE statement on a specific table.
+ Event
+ Is executed at a scheduled time.
+*/
+

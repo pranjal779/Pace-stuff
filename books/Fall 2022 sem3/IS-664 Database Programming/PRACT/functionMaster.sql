@@ -1,0 +1,19 @@
+DROP DATABASE IF EXSISTS function_master;
+CREATE DATABASE function_master;
+USE function_master;
+
+DELIMITER //
+CREATE FUNCTION My_Name()
+RETURNS varchar(20)
+DETEMINISTIC
+
+BEGIN
+    DECLARE N VARCHAR(20);
+    SET N = 'PRANJAL'
+    RETURN N;
+
+END //
+DELIMETER;
+
+
+SELECT My_Name() AS MSG;

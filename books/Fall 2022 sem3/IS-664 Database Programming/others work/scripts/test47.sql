@@ -1,0 +1,80 @@
+/* Practice exam 
+script */
+
+DROP FUNCTION IF EXISTS calc_distance;
+DELIMITER //
+CREATE FUNCTION calc_distance(Loc VARCHAR(30))
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+	
+BEGIN
+DECLARE DISTANCE DECIMAL(10,2);
+DECLARE X,Y INT;
+select XCoord from site where SiteName = Loc into x;
+select YCoord from site where SiteName = Loc into y;
+set DISTANCE = abs(x-y);
+
+Return DISTANCE;
+
+END //
+
+DELIMITER ;
+
+
+/*
+CREATING THE REQUIRED
+PROCEDURE */
+
+DROP PROCEDURE widget_connect;
+DELIMITER //
+CREATE PROCEDURE widget_connect(A VARCHAR(40))
+
+BEGIN
+	-- CREATE UTILITY VARIABLES
+	DECLARE count_rows, I INT;	
+
+	-- CREATE CURSOR VARIABLES
+	DECLARE W_ID, NET_IN, NET_STAT, LOC, W_TYP VARCHAR(30);
+	DECLARE NET_BW INT;
+	DECLARE CODE DECIMAL(10,2);
+	DECLARE U_SER JSON;
+
+	-- DECLARE CURSOR
+	DECLARE WID_CURSOR CURSOR FOR SELECT W.WID, W.WTYPE, N.NETNAME, N.NETSTATUS, N.BANDWIDTH,S.SITENAME 
+	FROM NETWORK N INNER JOIN WIDGET W ON W.ASSIGNEDTO = N.NETNAME INNER JOIN SITE S ON S.SITENAME = W.LOCATION AND N.NETNAME = A ; 
+
+	DROP TABLE IF EXISTS master_widget;
+	CREATE TABLE master_widget(
+		WID VARCHAR(30),
+		WTYPE ENUM('Pad','Terminal','Device'),
+		NetworkIn VARCHAR(30),
+		NetworkStatus VARCHAR(30),
+		NetworkBW int,
+		Location VARCHAR(30),
+		DistanceTo DECIMAL(10,2),
+		User JSON,
+		CONSTRAINT PK_MW PRIMARY KEY(WID),
+		CONSTRAINT UK_MW UNIQUE KEY(WID),
+		CONSTRAINT FK_MW FOREIGN KEY(WID) REFERENCES widget(WID));
+
+	-- OPEN CURSOR
+	OPEN WID_CURSOR;
+	SET count_rows = Found_Rows();
+	SET I = 0;
+	WHILE I < count_rows DO
+		FETCH WID_CURSOR INTO W_ID, W_TYP, NET_IN, NET_STAT, NET_BW,LOC;
+		SET CODE = calc_distance(LOC);
+
+		INSERT INTO master_widget(WID,WTYPE,NetworkIn,NetworkStatus,NetworkBW,Location,DistanceTo,User) 
+		VALUES (W_ID,W_TYP,NET_IN,NET_STAT,NET_BW,LOC,CODE,JSON_OBJECT("Tech:",(W_TYP),"Status:",(NET_STAT),"Location:",(LOC)));
+		SET I = I + 1;
+	END WHILE;
+	CLOSE WID_CURSOR;
+
+	SELECT * FROM master_widget;
+
+
+END //
+DELIMITER ;
+
+CALL widget_connect('Zebetis05uNET_CIV') ;

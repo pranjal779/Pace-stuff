@@ -1,0 +1,23 @@
+DROP DATABASE IF EXISTS LocklearDB;
+CREATE DATABASE LocklearDB;
+USE LocklearDB;
+
+CREATE TABLE R1(
+A VARCHAR(20),
+B DECIMAL(10,2),
+C INT,
+CONSTRAINT PK_R1 PRIMARY KEY(A)
+);
+
+LOAD DATA LOCAL INFILE "C:\\Users\\prath\\Desktop\\pranjal's studies\\Pace stuff\\books\\Fall 2022 sem 3\\IS-664 Database Programming\\lecture 2\\DATA_DB.sql" INTO TABLE R1;
+
+
+SELECT * FROM R1;
+
+/*
+DESCRIBE R1;
+
+INSERT INTO R1 (A,c) VALUES('PRANJAL', 27);
+INSERT INTO R1 VALUES('PRANJOL', 200.00,45);
+*/
+

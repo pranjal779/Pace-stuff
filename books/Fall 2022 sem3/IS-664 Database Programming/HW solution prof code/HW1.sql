@@ -1,0 +1,356 @@
+USE imperial_defense;
+
+-- TASK 1 
+DROP FUNCTION IF EXISTS routerDisplay;
+DELIMITER //
+CREATE FUNCTION routerDisplay(R VARCHAR(5))
+RETURNS VARCHAR(100)
+NOT DETERMINISTIC
+READS SQL DATA
+
+BEGIN
+	DECLARE A VARCHAR(20); DECLARE B VARCHAR(20); DECLARE C VARCHAR(20);
+	DECLARE D VARCHAR(20); DECLARE E VARCHAR(100);
+	SELECT RID,RType,RouteFinding,Connectivity
+	INTO A,B,C,D
+	FROM router
+	WHERE RID = R;
+
+	SET A = CONCAT('ID: ',A);
+	SET B = CONCAT('TYPE: ',B);
+	SET C = CONCAT('PATH: ',C);
+	SET D = CONCAT('CONNECT: ',D);
+
+	SET E = CONCAT_WS('->',A,B,C,D);
+	RETURN E;
+
+
+END //
+DELIMITER ; 
+
+SELECT routerDisplay('RTR1') AS 'TASK 1';
+
+-- TASK 2
+DROP FUNCTION IF EXISTS timeTillRevise;
+DELIMITER //
+CREATE FUNCTION timeTillRevise(N VARCHAR(20))
+RETURNS VARCHAR(100)
+NOT DETERMINISTIC
+READS SQL DATA
+
+BEGIN
+	DECLARE A VARCHAR(20); DECLARE B VARCHAR(20);
+	DECLARE T DECIMAL(10,2); DECLARE E VARCHAR(100);
+	SELECT SName,ReviseDate
+	INTO A,B
+	FROM antivirus
+	WHERE SName = N;
+
+	SET T = DATEDIFF(B,'2022-02-10');
+	SET T = T / 365;
+	SET E = CONCAT(A,' Antivirus Software Revision in ',T,' years');
+	RETURN E;
+
+END //
+DELIMITER ; 
+
+SELECT timeTillRevise('Aphalea') AS 'TASK 2';
+
+-- TASK 3
+DROP FUNCTION IF EXISTS firewallCode;
+DELIMITER //
+CREATE FUNCTION getFirewallCode(ID VARCHAR(20))
+RETURNS VARCHAR(100)
+NOT DETERMINISTIC
+READS SQL DATA
+
+BEGIN
+	DECLARE A VARCHAR(20); DECLARE B VARCHAR(20); DECLARE C VARCHAR(20);
+	DECLARE P VARCHAR(20); DECLARE I VARCHAR(100);
+	
+	SELECT IDNumber,SystemName,Filter
+	INTO A,B,C
+	FROM firewall
+	WHERE IDNumber = ID;
+
+	IF C = 'Packet' AND B = 'Zara' THEN
+		SET P = '25';
+	END IF;
+
+	IF C = 'Frame' AND B = 'Zara' THEN
+		SET P = '30';
+	END IF;
+	
+	IF C = 'Frame' AND B = 'Etis' THEN
+		SET P = '35';
+	END IF;
+
+	IF C = 'Packet' AND B = 'Etis' THEN
+		SET P = '40';
+	END IF;
+
+	IF C = 'Packet' AND B = 'Ecoria' THEN
+		SET P = '45';
+	END IF;
+
+	IF C = 'Frame' AND B = 'Cheirus' THEN
+		SET P = '50';
+	END IF;
+
+	SET I = CONCAT(A,'->',B,'->',C,'->','CODE: ',P);
+	RETURN I;	
+
+END //
+DELIMITER ; 
+
+SELECT getFirewallCode('FW_y-0') AS 'TASK 3';
+
+-- TASK 4
+DROP FUNCTION IF EXISTS hubPortDifference;
+DELIMITER //
+CREATE FUNCTION hubPortDifference(H1 VARCHAR(10),H2 VARCHAR(10))
+RETURNS VARCHAR(100)
+NOT DETERMINISTIC
+READS SQL DATA
+
+BEGIN
+	DECLARE A VARCHAR(20); DECLARE B INT; DECLARE C INT;
+	DECLARE D VARCHAR(20); DECLARE E INT; DECLARE F INT;
+	DECLARE DIF_1 INT; DECLARE DIF_2 INT;
+
+	DECLARE R VARCHAR(100);
+	SELECT HID,EntryPort,ExitPort
+	INTO A,B,C
+	FROM hub
+	WHERE HID = H1;
+
+	SELECT HID,EntryPort,ExitPort
+	INTO D,E,F
+	FROM hub
+	WHERE HID = H2;
+
+	SET R = CONCAT('HUB: ',A,' Range: ',ABS(B-C),' ','HUB: ',D,' Range: ',ABS(E-F));
+	RETURN R;	
+
+END //
+DELIMITER ; 
+
+SELECT hubPortDifference('HB-1','HB-10') AS 'TASK 4';
+
+-- TASK 5 HELPER
+DROP FUNCTION IF EXISTS euclidean2D;
+DELIMITER //
+CREATE FUNCTION euclidean2D(X1 INT, Y1 INT, X2 INT, Y2 INT)
+RETURNS VARCHAR(100)
+DETERMINISTIC
+
+BEGIN
+	DECLARE XDIFF INT; DECLARE YDIFF INT;
+	DECLARE D DECIMAL(10,2); 
+	SET XDIFF = POW(X1 - X2,2);
+	SET YDIFF = POW(Y1 - Y2,2);
+	SET D = SQRT(XDIFF + YDIFF);	
+	RETURN D;	
+
+END //
+DELIMITER ; 
+
+SELECT euclidean2D(1,1,1,1) AS 'TASK 5 HELPER';
+
+
+-- TASK 5
+DROP FUNCTION IF EXISTS distanceToSite;
+DELIMITER //
+CREATE FUNCTION distanceToSite(S VARCHAR(20),LX INT, LY INT)
+RETURNS VARCHAR(100)
+NOT DETERMINISTIC
+READS SQL DATA
+
+BEGIN
+	DECLARE A VARCHAR(20); DECLARE B VARCHAR(20); 
+	DECLARE C INT; DECLARE D INT;	
+	DECLARE ED DECIMAL(10,2);
+	DECLARE R VARCHAR(100);	
+
+	SELECT SiteName,SiteStatus,XCoord,YCoord
+	INTO A,B,C,D
+	FROM site
+	WHERE SiteName = S;
+
+	IF B = 'OFFLINE' THEN
+		SET R = 'Site Offline...Distance Unknown';
+		RETURN R;
+	END IF;
+
+	SET ED = euclidean2D(C,D,LX,LY);
+	SET R = CONCAT('Distance to location [',LX,':',LY,'] from ',A, ' is ',ED,' Km');
+	RETURN R;	
+
+END //
+DELIMITER ; 
+
+SELECT distanceToSite('Eap246e1',0,0) AS 'TASK 5';
+SELECT distanceToSite('Eaw99q12',0,0) AS 'TASK 5';
+
+-- TASK 6
+DROP FUNCTION IF EXISTS distanceBetweenWidgets;
+DELIMITER //
+CREATE FUNCTION distanceBetweenWidgets(W1 VARCHAR(20),W2 VARCHAR(20))
+RETURNS VARCHAR(100)
+NOT DETERMINISTIC
+READS SQL DATA
+
+BEGIN
+	DECLARE A1 VARCHAR(20); DECLARE B1 VARCHAR(20);
+	DECLARE C1 INT; DECLARE D1 INT; 
+
+	DECLARE A2 VARCHAR(20); DECLARE B2 VARCHAR(20);
+	DECLARE C2 INT; DECLARE D2 INT; 
+
+	DECLARE DIS DECIMAL(10,2);
+	DECLARE R VARCHAR(100);
+
+	SELECT W.WID,W.Location,S.XCoord,S.YCoord
+	INTO A1,B1,C1,D1
+	FROM widget W
+	JOIN Site S ON W.Location = S.SiteName 
+	WHERE WID = W1;
+
+	SELECT W.WID,W.Location,S.XCoord,S.YCoord
+	INTO A2,B2,C2,D2
+	FROM widget W
+	JOIN Site S ON W.Location = S.SiteName 
+	WHERE WID = W2;
+
+	SET DIS = euclidean2D(C1,D1,C2,D2);
+	SET R = CONCAT('Distance from ',A1,' Located at Site ',B1,
+	 ' to ',A2,' Located at Site ',B2, ' is ',DIS,' Kms');
+
+	RETURN R;	
+
+END //
+DELIMITER ; 
+
+SELECT distanceBetweenWidgets('WDG#1','WDG#10') AS 'TASK 6_1';
+SELECT distanceBetweenWidgets('WDG#2','WDG#4') AS 'TASK 6_2';
+
+-- TASK 7
+DROP FUNCTION IF EXISTS networkBWRange;
+DELIMITER //
+CREATE FUNCTION networkBWRange(N VARCHAR(50))
+RETURNS VARCHAR(100)
+NOT DETERMINISTIC
+READS SQL DATA
+
+BEGIN
+	DECLARE A VARCHAR(20); 
+	DECLARE MX DECIMAL(10,2); DECLARE MN DECIMAL(10,2);
+	DECLARE NS VARCHAR(20);
+	DECLARE R VARCHAR(100); DECLARE T VARCHAR(100);
+	DECLARE DIFF DECIMAL(10,2);
+
+	SELECT NetName,MaxBW,MinBW,NetStatus
+	INTO A,MX,MN,NS
+	FROM network
+	WHERE NetName = N;
+
+	SET DIFF = MX - MN;
+
+	IF NS = 'OFFLINE' THEN
+		SET R = 'Network is Offline Bandwidth is 0';
+		RETURN R;
+	END IF;
+
+	SET T = ' ';
+	
+	IF SUBSTRING_INDEX(A, '_', -1) = 'TRACK' THEN
+		SET T = 'Tracking Network';
+	END IF;
+
+	IF SUBSTRING_INDEX(A, '_', -1) = 'SAT' THEN
+		SET T = 'Satellite Network';
+	END IF;
+
+	IF SUBSTRING_INDEX(A, '_', -1) = 'DEF' THEN
+		SET T = 'Defense Network';
+	END IF;
+
+	IF SUBSTRING_INDEX(A, '_', -1) = 'CIV' THEN
+		SET T = 'Civilian Network';
+	END IF;
+
+	IF SUBSTRING_INDEX(A, '_', -1) = 'SURV' THEN
+		SET T = 'Surveillance Network';
+	END IF;	
+
+	SET R = CONCAT(T,' ',A,' Bandwidth Range is ', DIFF, ' gbs');
+	
+	RETURN R;
+
+END //
+DELIMITER ;
+
+SELECT networkBWRange('Brore01wNET_TRACK') AS 'TASK 7_1';
+SELECT networkBWRange('Brore03yNET_SAT') AS 'TASK 7_2';
+SELECT networkBWRange('Zebetis05uNET_CIV') AS 'TASK 7_3';
+
+-- TASK 8
+DROP FUNCTION IF EXISTS switchConfiguration;
+DELIMITER //
+CREATE FUNCTION switchConfiguration(SW VARCHAR(50))
+RETURNS VARCHAR(200)
+NOT DETERMINISTIC
+READS SQL DATA
+
+BEGIN
+	DECLARE A VARCHAR(20); DECLARE AT VARCHAR(20); 
+	DECLARE EP INT; DECLARE EXP INT;
+	DECLARE STK INT; DECLARE PE INT;
+	DECLARE NS VARCHAR(20); 
+	DECLARE R VARCHAR(200);
+	DECLARE V INT; DECLARE PP INT;
+	DECLARE PWR VARCHAR(10); DECLARE SEC VARCHAR(20);
+
+	SELECT S.SID,S.EntryPort,S.ExitPort,S.Stackable,S.PoE,S.AssignedTo, 
+	N.NetStatus
+	INTO A,EP,EXP,STK,PE,AT,NS
+	FROM switch S
+	JOIN network N ON S.AssignedTo = N.NetName
+	WHERE SID = SW;
+
+	IF NS = 'OFFLINE' THEN
+		SET R = 'The Switch is Currently Unavailable';
+		RETURN R;
+	END IF;
+
+	IF SUBSTRING_INDEX(A, '-', -1) % 2 = 0 AND STK = 0 THEN
+		SET PP = EP;
+	ELSE
+		SET PP = EXP;
+	END IF;
+
+	IF PE = 1 THEN
+		SET PWR = 'AC';
+	ELSE
+		SET PWR = 'DC';
+	END IF;
+
+	IF PP = EP THEN
+		SET SEC = 'Secure Switch';
+	ELSE
+		SET SEC = 'Unsecure Switch';
+	END IF;
+
+	SET R = CONCAT('Switch ',A,' PRIMARY PORT: ',PP,' POWER: ',PWR,' SECURITY: ',SEC,' is part of Network ',AT);
+	
+	RETURN R;
+
+END //
+DELIMITER ;
+
+SELECT switchConfiguration('SW-1') AS 'Task 8_1';
+SELECT switchConfiguration('SW-5') AS 'Task 8_2';
+SELECT switchConfiguration('SW-20') AS 'Task 8_3';
+
+
+
