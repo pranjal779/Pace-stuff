@@ -1,0 +1,111 @@
+---
+title: "Assignment1 Submission"
+autor: "Your name goes here.."
+output: html_document
+---
+
+## Answers
+
+
+**1.** 
+
+
+**a.** 
+```{r}
+#type your code here
+```
+Based on the result above, I think the diff() function .....
+
+
+**b.** 
+```{r}
+#type your code here
+```
+
+The results suggest...
+
+
+**c.** 
+```{r}
+#type your code here
+```
+
+
+**2.** 
+    
+**a.**  
+```{r}
+#type your code here
+```
+
+**b.** 
+```{r}
+#type your code here
+```
+
+**c.**
+```{r}
+#type your code here
+```
+
+**d.**  
+```{r}
+#type your code here
+```
+
+**e.**
+
+```{r}
+#commute + 1
+```
+The function above adds one to (I almost answer it for you here :-) )
+
+```{r}
+#commute[-6]
+```
+The function above...
+
+```{r}
+#sum(commute>21 | commute<16)
+```
+The function above ...
+
+```{r}
+#commute[commute>=17]
+```
+The function above .
+
+```{r}
+#sum(commute[commute>20])
+```
+The function above ... 
+```{r}
+#commute[4:6] 
+```
+The function above ..
+
+
+```{r}
+
+```
+
+
+**3.**
+```{r}
+#type your code here
+```
+
+**4.** 
+  **a.** 
+  
+```{r}
+#type your code here
+```
+The function above .... 
+
+  **b.** 
+  
+```{r}
+#type your code here
+```
+

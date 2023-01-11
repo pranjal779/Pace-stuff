@@ -1,0 +1,31 @@
+[33mcommit 5808cbe66c90d4a6a91637dcdd7e1b26cca2d093[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Pranjal Shukla <pranjal779@gmail.com>
+Date:   Wed Jan 11 00:33:47 2023 -0500
+
+    (#3) remaining files
+
+[33mcommit 9c3baea0584015e7211b69216da398b76fc90746[m
+Author: Pranjal Shukla <pranjal779@gmail.com>
+Date:   Wed Jan 11 00:20:44 2023 -0500
+
+    Revert "(#3) remaining files"
+    
+    This reverts commit bc2955b8fbb80d24f26aaa09f6272e150c8f97ed.
+
+[33mcommit bc2955b8fbb80d24f26aaa09f6272e150c8f97ed[m
+Author: Pranjal Shukla <pranjal779@gmail.com>
+Date:   Tue Jan 10 23:50:37 2023 -0500
+
+    (#3) remaining files
+
+[33mcommit 9558a291f76bcd7ea6e7cf51773f2ec2c41b9fb9[m
+Author: Pranjal Shukla <pranjal779@gmail.com>
+Date:   Sun Nov 20 20:44:06 2022 -0500
+
+    (#2) added 2 folders
+
+[33mcommit 8f887d5e349b54e1919a06d8aa8ec79f52383c4a[m
+Author: Pranjal Shukla <pranjal779@gmail.com>
+Date:   Sun Nov 20 20:34:40 2022 -0500
+
+    Initial commit

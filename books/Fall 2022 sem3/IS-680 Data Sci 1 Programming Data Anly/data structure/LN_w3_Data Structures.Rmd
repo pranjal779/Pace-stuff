@@ -1,0 +1,265 @@
+---
+title: "IS680 Lecture Notes - week 3"
+output: html_notebook
+---
+
+```{r}
+x=c(7, 8 , 10, 45)
+```
+
+```{r}
+is.vector(x)
+```
+```{r}
+x[1]
+```
+```{r}
+x[3]
+```
+```{r}
+x[-4]
+```
+## Empty Vector
+```{r}
+weekly.hours<-vector(length=7)
+```
+
+```{r}
+weekly.hours[1]=10
+#weekly.hours[8]=11
+
+weekly.hours
+```
+```{r}
+weekly.hours[2]="yegin"
+```
+
+```{r}
+weekly.hours
+```
+
+```{r}
+weekly.hours[2]=11
+```
+
+```{r}
+weekly.hours
+```
+
+
+
+
+```{r}
+x
+y=c(-7, -8, -10, -46)
+
+x+y
+```
+## Recycling
+```{r}
+x
+z=c(7,8)
+
+print(x)
+print(z)
+print(x-z)
+```
+
+```{r}
+x - c(7,8,7,8)
+```
+
+```{r} 
+x * 2
+```
+
+## Comparisons
+```{r}
+x > 9 
+
+(x > 9 ) & (x< 20)
+```
+```{r}
+(x > 9 ) | (x< 20)
+```
+
+```{r}
+x=c(0.5-0.3,  0.3 - 0.1) 
+y=c(0.7 - 0.5, 0.9 - 0.7)
+
+x==y
+
+z=c(0.5-0.3, 0.2-0.1)
+t=c(0.5-0.3, 0.2-0.1)
+z==t
+```
+
+## Functions
+
+```{r}
+x=c(7, 8 , 10, 45)
+
+mean(x)
+sum(x)
+```
+
+```{r}
+sum(x)/length(x)
+```
+
+```{r}
+x=sort(x, decreasing=TRUE)
+```
+
+```{r}
+x
+```
+
+
+```{r}
+x[1:2]
+x[2:4]
+x[3:7]
+
+```
+
+```{r}
+x[c(1,3)]
+```
+
+
+```{r}
+x
+index_vector=c(1,3)
+
+index_vector
+```
+
+```{r}
+x[index_vector]
+```
+
+```{r}
+x[c(1,3)]
+
+```
+
+```{r}
+x[c(-1,-3)]
+```
+
+```{r}
+x[1:2]
+```
+
+```{r}
+x<9
+```
+
+```{r}
+x[c(TRUE, TRUE, FALSE, TRUE)]
+```
+
+```{r}
+x[x<9]
+```
+
+```{r}
+
+which(x<9)
+```
+## Matrix
+
+```{r}
+matrix(1:15, nrow = 3)
+```
+```{r}
+matrix(1:15, nrow = 4)
+```
+
+
+```{r}
+my_matrix=matrix(1:15, nrow =3)
+my_matrix
+```
+
+```{r}
+my_matrix[1,2]
+```
+
+```{r}
+#require(ggplot2)
+mtcars
+```
+
+```{r}
+colnames(mtcars)
+```
+```{r}
+mtcars[1,]
+```
+
+```{r}
+mtcars[1,c(1,3)]
+```
+
+```{r}
+mtcars[c(1,3), 1]
+```
+## Filtering 
+Show the cars with mpg of 24 or less
+```{r}
+mtcars[,1]<24
+mtcars[mtcars[,1]<24,]
+```
+```{r}
+mtcars[mtcars[,2]==6,]
+```
+
+# Question
+Find the cars that have above the average hp
+
+```{r}
+mean.hp=mean(mtcars[,4])
+high.perf=mtcars[mtcars[,4]>mean.hp,]
+```
+
+Average mpg for high performance cars
+```{r}
+mean(high.perf[,1])
+
+mean(high.perf[,'mpg'])
+```
+
+Average mpg for low performance cars
+
+```{r}
+low.perf=mtcars[mtcars[,4]<=mean.hp,]
+mean(low.perf[,1])
+```
+
+```{r}
+mtcars[,1]
+mtcars[,'mpg']
+mtcars$mpg
+```
+```{r}
+rownames(mtcars)
+
+mtcars['carnames']=rownames(mtcars)
+
+```
+
+```{r}
+mtcars['mpl']=mtcars['mpg']/3.7
+
+mtcars
+```
+```{r}
+require(tidyverse)
+```
+
+```{r}
+mtcars%>%filter(mpg>mean(mpg))
+```
+
